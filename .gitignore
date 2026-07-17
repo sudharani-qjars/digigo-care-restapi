@@ -12,4 +12,8 @@ env/
 .DS_Store
 Thumbs.db
 
+.idea
 
+*.log
+afw.txt
+*.html
