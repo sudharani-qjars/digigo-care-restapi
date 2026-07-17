@@ -12,11 +12,8 @@ env/
 .DS_Store
 Thumbs.db
 
-# Logs
+.idea
+
 *.log
-
-# Test Reports
-*.html
-test.log
 afw.txt
-
+*.html
