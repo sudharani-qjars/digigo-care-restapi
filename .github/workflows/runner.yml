@@ -1,4 +1,4 @@
-name: Digigo Care REST API Tests
+name: Digigo Care REST API Tests Automation
 
 on:
   push:
