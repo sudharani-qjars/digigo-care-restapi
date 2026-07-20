@@ -143,7 +143,7 @@ DOCTOR_SCHEMA = {
               },
               "slot_interval": {
                 "type": "integer",
-                "minimum": 1
+                "minimum": 0
               }
             }
           }
@@ -196,7 +196,7 @@ DOCTOR_SCHEMA = {
         },
         "slot_interval": {
           "type": "integer",
-          "minimum": 1
+          "minimum": 0
         },
         "min_advance_booking_hours": {
           "type": "integer",
