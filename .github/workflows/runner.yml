@@ -55,24 +55,28 @@ jobs:
           import xml.etree.ElementTree as ET
           import os
 
-          # Fallback metrics if the file doesn't exist or is corrupted
           total, errors, failures, skipped = 0, 0, 0, 0
           
           if os.path.exists("report.xml"):
-              tree = ET.parse("report.xml")
-              root = tree.getroot()
-              
-              # Read base attributes from the testsuite root element
-              total = int(root.attrib.get("tests", 0))
-              errors = int(root.attrib.get("errors", 0))
-              failures = int(root.attrib.get("failures", 0))
-              skipped = int(root.attrib.get("skipped", 0))
+              try:
+                  tree = ET.parse("report.xml")
+                  root = tree.getroot()
+                  
+                  # Look for the testsuite element anywhere in the XML tree hierarchy
+                  suite = root if root.tag == "testsuite" else root.find(".//testsuite")
+                  
+                  if suite is not None:
+                      total = int(suite.attrib.get("tests", 0))
+                      errors = int(suite.attrib.get("errors", 0))
+                      failures = int(suite.attrib.get("failures", 0))
+                      skipped = int(suite.attrib.get("skipped", 0))
+              except Exception as e:
+                  print(f"Error parsing XML file: {e}")
 
-          # Calculate total overall failures and standard passed count
+          # Safe subtraction math
           total_failed = failures + errors
-          total_passed = total - total_failed - skipped
+          total_passed = max(0, total - total_failed - skipped)
 
-          # Map values to the GitHub Env context for the next steps
           with open(os.environ['GITHUB_ENV'], 'a') as f:
               f.write(f"TEST_TOTAL={total}\n")
               f.write(f"TEST_PASSED={total_passed}\n")
