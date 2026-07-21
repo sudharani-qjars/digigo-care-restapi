@@ -53,3 +53,15 @@ jobs:
         with:
           name: pytest-report
           path: reports/
+
+            # This step handles sending results to Slack
+      - name: Send Status to Slack
+        uses: slackapi/slack-github-action@v1.26.0
+        if: always()
+        with:
+          payload: |
+            {
+              "text": "GitHub Actions Build Result: ${{ job.status }}\nRepository: ${{ github.repository }}\nCommit: ${{ github.sha }}\nReport: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.upload-artifact.outputs.artifact-id }}|Download Pytest HTML Report>"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
