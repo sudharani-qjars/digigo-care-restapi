@@ -45,14 +45,45 @@ jobs:
       - name: Generate HTML Report
         if: always()
         run: |
-          pytest --html=reports/report.html --self-contained-html || true
+          pytest --html=report.html --self-contained-html --junitxml=report.xml
+
+      - name: Parse Test Metrics
+        if: always()
+        id: metrics
+        shell: python
+        run: |
+          import xml.etree.ElementTree as ET
+          import os
+
+          # Fallback metrics if the file doesn't exist or is corrupted
+          total, errors, failures, skipped = 0, 0, 0, 0
+          
+          if os.path.exists("report.xml"):
+              tree = ET.parse("report.xml")
+              root = tree.getroot()
+              
+              # Read base attributes from the testsuite root element
+              total = int(root.attrib.get("tests", 0))
+              errors = int(root.attrib.get("errors", 0))
+              failures = int(root.attrib.get("failures", 0))
+              skipped = int(root.attrib.get("skipped", 0))
+
+          # Calculate total overall failures and standard passed count
+          total_failed = failures + errors
+          total_passed = total - total_failed - skipped
+
+          # Map values to the GitHub Env context for the next steps
+          with open(os.environ['GITHUB_ENV'], 'a') as f:
+              f.write(f"TEST_TOTAL={total}\n")
+              f.write(f"TEST_PASSED={total_passed}\n")
+              f.write(f"TEST_FAILED={total_failed}\n")
 
       - name: Upload Test Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pytest-report
-          path: reports/
+          name: pytest-html-report
+          path: report.html
 
             # This step handles sending results to Slack
       - name: Send Status to Slack
@@ -61,7 +92,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "GitHub Actions Build Result: ${{ job.status }}\nRepository: ${{ github.repository }}\nCommit: ${{ github.sha }}\nReport: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Download Pytest HTML Report>"
+              "text": "GitHub Actions Build Result: ${{ job.status }}\nRepository: ${{ github.repository }}\nCommit: ${{ github.sha }}\n\n*Test Summary:*\n• Total Tests: ${{ env.TEST_TOTAL }}\n• Passed: ${{ env.TEST_PASSED }} ✅\n• Failed: ${{ env.TEST_FAILED }} ❌\n\nReport: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Download Pytest HTML Report>"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
