@@ -56,21 +56,30 @@ pipeline {
         }
     }
 
-    post {
+        post {
         always {
-            // Publishes the API test report
-            htmlpublisher(
-                allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true,
-                reportDir: '.', reportFiles: 'api_report.html',
-                reportName: 'Pytest API Report', reportTitles: 'API Test Results'
-            )
+            // Publishes the API test report using correct pipeline syntax
+            publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: '.',
+                reportFiles: 'api_report.html',
+                reportName: 'Pytest API Report',
+                reportTitles: 'API Test Results'
+            ])
 
-            // Publishes the UI test report from the separate folder
-            htmlpublisher(
-                allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true,
-                reportDir: 'digigo-care-ui-automation', reportFiles: 'ui_report.html',
-                reportName: 'Pytest UI Report', reportTitles: 'UI Test Results'
-            )
+            // Publishes the UI test report using correct pipeline syntax
+            publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'digigo-care-ui-automation',
+                reportFiles: 'ui_report.html',
+                reportName: 'Pytest UI Report',
+                reportTitles: 'UI Test Results'
+            ])
         }
     }
+
 }
