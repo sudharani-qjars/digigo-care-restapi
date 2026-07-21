@@ -61,7 +61,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "GitHub Actions Build Result: ${{ job.status }}\nRepository: ${{ github.repository }}\nCommit: ${{ github.sha }}\nReport: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.upload-artifact.outputs.artifact-id }}|Download Pytest HTML Report>"
+              "text": "GitHub Actions Build Result: ${{ job.status }}\nRepository: ${{ github.repository }}\nCommit: ${{ github.sha }}\nReport: <${{ steps.upload_report.outputs.artifact-url }}|Download Pytest HTML Report>"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
